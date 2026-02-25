@@ -1,1477 +1,778 @@
 /* ============================================
-   FORMULARIO TI — Enterprise Design System
-   CESFAM Dr. Alfredo Gantz Mann
-   v3.0 — Perfection
+   FORMULARIO TI — Production Script
+   Form + Firebase + Google Sheets + Chatbot IA
    ============================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+// ---- Firebase Configuration (uses CDN compat loaded in HTML) ----
+const firebaseConfig = {
+    apiKey: "AIzaSyBPxvqvNfHKE1YJe4h6UwHznY4jsZMiJ0A",
+    authDomain: "reportes-cesfam.firebaseapp.com",
+    databaseURL: "https://reportes-cesfam-default-rtdb.firebaseio.com",
+    projectId: "reportes-cesfam",
+    storageBucket: "reportes-cesfam.firebasestorage.app",
+    messagingSenderId: "101243881563",
+    appId: "1:101243881563:web:793a5a48ffce80f2a4977e"
+};
 
-/* ========== DESIGN TOKENS ========== */
-:root {
-    --bg-body: #06090f;
-    --bg-surface: rgba(12, 17, 29, 0.78);
-    --bg-surface-hover: rgba(16, 22, 38, 0.88);
-    --bg-input: rgba(14, 20, 36, 0.7);
-    --bg-input-hover: rgba(20, 28, 48, 0.85);
-    --bg-input-focus: rgba(22, 32, 56, 0.95);
-    --bg-navbar: rgba(6, 9, 15, 0.72);
-    --text-primary: #f0f2f8;
-    --text-secondary: #94a0be;
-    --text-muted: #5c6784;
-    --text-label: #b0b8d2;
-    --text-placeholder: #586480;
-    --cyan: #06b6d4;
-    --cyan-light: #22d3ee;
-    --indigo: #6366f1;
-    --indigo-light: #818cf8;
-    --violet: #8b5cf6;
-    --accent-gradient: linear-gradient(135deg, #06b6d4, #6366f1, #8b5cf6);
-    --accent-gradient-h: linear-gradient(90deg, #06b6d4, #6366f1, #8b5cf6);
-    --border: rgba(100, 116, 160, 0.2);
-    --border-hover: rgba(6, 182, 212, 0.3);
-    --border-focus: rgba(6, 182, 212, 0.55);
-    --border-card: rgba(100, 116, 160, 0.14);
-    --success: #10b981;
-    --error: #f43f5e;
-    --warning: #f59e0b;
-    --urg-low: #10b981;
-    --urg-med: #f59e0b;
-    --urg-crit: #f43f5e;
-    --shadow-card: 0 8px 40px rgba(0, 0, 0, 0.5), 0 0 80px rgba(6, 182, 212, 0.04);
-    --glow-cyan: 0 0 40px rgba(6, 182, 212, 0.15);
-    --glow-indigo: 0 0 40px rgba(99, 102, 241, 0.12);
-    --r-sm: 10px;
-    --r-md: 14px;
-    --r-lg: 18px;
-    --r-xl: 24px;
-    --t-fast: 0.15s ease;
-    --t-base: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --t-spring: 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
 
-/* ========== LIGHT THEME ========== */
-[data-theme="light"] {
-    --bg-body: #f0f3fa;
-    --bg-surface: rgba(255, 255, 255, 0.88);
-    --bg-surface-hover: rgba(255, 255, 255, 0.96);
-    --bg-input: rgba(235, 239, 250, 0.9);
-    --bg-input-hover: #fff;
-    --bg-input-focus: #fff;
-    --bg-navbar: rgba(244, 246, 251, 0.82);
-    --text-primary: #0f1729;
-    --text-secondary: #3d4b66;
-    --text-muted: #7a88a4;
-    --text-label: #2d3a52;
-    --text-placeholder: #8896b0;
-    --border: rgba(60, 80, 140, 0.15);
-    --border-hover: rgba(6, 182, 212, 0.25);
-    --border-focus: rgba(6, 182, 212, 0.5);
-    --border-card: rgba(60, 80, 140, 0.1);
-    --shadow-card: 0 4px 35px rgba(0, 0, 0, 0.06), 0 0 60px rgba(6, 182, 212, 0.03);
-    --glow-cyan: 0 0 30px rgba(6, 182, 212, 0.06);
-    --glow-indigo: 0 0 30px rgba(99, 102, 241, 0.04);
-}
+const googleSheetsURL = "https://script.google.com/macros/s/AKfycbyMeb2xZf0wy6rtTkLezBVsRJh7ElyIxBAZgjJBkRzsy8uLXHCwV_5SRZ8NqsBwYyU7/exec";
 
-/* ========== GLOBAL ========== */
-*,
-*::before,
-*::after {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+// ---- DOM Elements ----
+const nombreInput = document.getElementById('nombre');
+const areaInput = document.getElementById('area');
+const problemaInput = document.getElementById('problema');
+const urgenciaInput = document.getElementById('urgencia');
+const themeToggleButton = document.getElementById('theme-toggle-button');
+const htmlElement = document.documentElement;
+const navbar = document.getElementById('navbar');
 
-html {
-    scroll-behavior: smooth;
-}
+// ============================================
+//  THEME TOGGLE
+// ============================================
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-    width: 6px;
-}
+const iconSun = document.getElementById('icon-sun');
+const iconMoon = document.getElementById('icon-moon');
 
-::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-    background: rgba(99, 102, 241, 0.2);
-    border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: rgba(6, 182, 212, 0.3);
-}
-
-* {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(99, 102, 241, 0.2) transparent;
-}
-
-/* Text selection */
-::selection {
-    background: rgba(6, 182, 212, 0.25);
-    color: inherit;
-}
-
-::-moz-selection {
-    background: rgba(6, 182, 212, 0.25);
-    color: inherit;
-}
-
-body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: var(--bg-body);
-    color: var(--text-primary);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    transition: background var(--t-base), color var(--t-base);
-    -webkit-font-smoothing: antialiased;
-    line-height: 1.6;
-    overflow-x: hidden;
-}
-
-/* ========== BACKGROUND ========== */
-.bg-grid {
-    position: fixed;
-    inset: 0;
-    background-image: radial-gradient(rgba(99, 102, 241, 0.08) 1px, transparent 1px);
-    background-size: 32px 32px;
-    pointer-events: none;
-    z-index: 0;
-    mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 30%, transparent 100%);
-    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 30%, transparent 100%);
-}
-
-[data-theme="light"] .bg-grid {
-    background-image: radial-gradient(rgba(99, 102, 241, 0.05) 1px, transparent 1px);
-}
-
-.bg-orb {
-    position: fixed;
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 0;
-    filter: blur(80px);
-    opacity: 0.5;
-}
-
-.bg-orb--1 {
-    width: 500px;
-    height: 500px;
-    background: rgba(6, 182, 212, 0.12);
-    top: -15%;
-    left: -10%;
-    animation: orbFloat 18s ease-in-out infinite alternate;
-}
-
-.bg-orb--2 {
-    width: 400px;
-    height: 400px;
-    background: rgba(99, 102, 241, 0.1);
-    bottom: -10%;
-    right: -5%;
-    animation: orbFloat 22s ease-in-out infinite alternate-reverse;
-}
-
-.bg-orb--3 {
-    width: 300px;
-    height: 300px;
-    background: rgba(139, 92, 246, 0.08);
-    top: 40%;
-    right: 15%;
-    animation: orbFloat 15s ease-in-out infinite alternate;
-}
-
-[data-theme="light"] .bg-orb {
-    opacity: 0.25;
-    filter: blur(100px);
-}
-
-@keyframes orbFloat {
-    0% {
-        transform: translate(0, 0) scale(1);
-    }
-
-    50% {
-        transform: translate(30px, -20px) scale(1.08);
-    }
-
-    100% {
-        transform: translate(-20px, 15px) scale(0.95);
+function setTema(tema) {
+    if (tema === 'light') {
+        htmlElement.setAttribute('data-theme', 'light');
+        if (iconSun) iconSun.style.display = 'none';
+        if (iconMoon) iconMoon.style.display = 'block';
+        localStorage.setItem('themePreference', 'light');
+    } else {
+        htmlElement.setAttribute('data-theme', 'dark');
+        if (iconSun) iconSun.style.display = 'block';
+        if (iconMoon) iconMoon.style.display = 'none';
+        localStorage.setItem('themePreference', 'dark');
     }
 }
 
-/* ========== TOAST NOTIFICATIONS ========== */
-.toast-container {
-    position: fixed;
-    top: 1rem;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 2000;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    pointer-events: none;
-}
+themeToggleButton.addEventListener('click', () => {
+    const current = htmlElement.getAttribute('data-theme');
+    setTema(current === 'light' ? 'dark' : 'light');
+});
 
-.toast {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    padding: 0.75rem 1.2rem;
-    border-radius: var(--r-md);
-    font-size: 0.82rem;
-    font-weight: 500;
-    color: #fff;
-    backdrop-filter: blur(12px);
-    pointer-events: auto;
-    animation: toastIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
-    white-space: nowrap;
-    max-width: 90vw;
-}
-
-.toast--success {
-    background: rgba(16, 185, 129, 0.92);
-}
-
-.toast--error {
-    background: rgba(244, 63, 94, 0.92);
-}
-
-.toast--info {
-    background: rgba(6, 182, 212, 0.92);
-}
-
-.toast.hiding {
-    animation: toastOut 0.3s ease forwards;
-}
-
-@keyframes toastIn {
-    from {
-        opacity: 0;
-        transform: translateY(-20px) scale(0.95);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
+const preferenciaGuardada = localStorage.getItem('themePreference');
+if (preferenciaGuardada) {
+    setTema(preferenciaGuardada);
+} else {
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+        setTema('light');
+    } else {
+        setTema('dark');
     }
 }
 
-@keyframes toastOut {
-    from {
-        opacity: 1;
-        transform: translateY(0) scale(1);
+// ============================================
+//  NAVBAR SCROLL SHADOW
+// ============================================
+
+let lastScroll = 0;
+window.addEventListener('scroll', () => {
+    const y = window.scrollY;
+    if (navbar) {
+        if (y > 10) navbar.classList.add('scrolled');
+        else navbar.classList.remove('scrolled');
     }
+    lastScroll = y;
+}, { passive: true });
 
-    to {
-        opacity: 0;
-        transform: translateY(-12px) scale(0.95);
+// ============================================
+//  TOAST NOTIFICATIONS
+// ============================================
+
+function showToast(message, type = 'info', duration = 4000) {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `toast toast--${type}`;
+
+    const icons = {
+        success: '✅',
+        error: '❌',
+        info: 'ℹ️'
+    };
+
+    toast.innerHTML = `<span>${icons[type] || ''}</span><span>${message}</span>`;
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.add('hiding');
+        setTimeout(() => toast.remove(), 300);
+    }, duration);
+}
+
+// ============================================
+//  URGENCY COLOR-CODING
+// ============================================
+
+if (urgenciaInput) {
+    urgenciaInput.addEventListener('change', function () {
+        this.classList.remove('urgencia--bajo', 'urgencia--medio', 'urgencia--critico');
+        if (this.value === 'Bajo') this.classList.add('urgencia--bajo');
+        else if (this.value === 'Medio') this.classList.add('urgencia--medio');
+        else if (this.value === 'Cr\u00edtico') this.classList.add('urgencia--critico');
+    });
+}
+
+// ============================================
+//  CHARACTER COUNTER
+// ============================================
+
+const charCounter = document.getElementById('char-counter');
+if (problemaInput && charCounter) {
+    const maxLen = parseInt(problemaInput.getAttribute('maxlength')) || 2000;
+    problemaInput.addEventListener('input', () => {
+        const len = problemaInput.value.length;
+        charCounter.textContent = `${len} / ${maxLen}`;
+        charCounter.classList.remove('near-limit', 'at-limit');
+        if (len >= maxLen * 0.9) charCounter.classList.add('at-limit');
+        else if (len >= maxLen * 0.75) charCounter.classList.add('near-limit');
+    });
+}
+
+// ============================================
+//  FIELD VALIDATION HELPERS
+// ============================================
+
+function setFieldError(fieldId, errorId, message) {
+    const field = document.getElementById(fieldId);
+    const error = document.getElementById(errorId);
+    if (field) { field.classList.add('is-invalid'); }
+    if (error) { error.textContent = message; error.classList.add('visible'); }
+}
+
+function clearFieldError(fieldId, errorId) {
+    const field = document.getElementById(fieldId);
+    const error = document.getElementById(errorId);
+    if (field) field.classList.remove('is-invalid');
+    if (error) { error.textContent = ''; error.classList.remove('visible'); }
+}
+
+function clearAllErrors() {
+    document.querySelectorAll('.form-control.is-invalid').forEach(f => f.classList.remove('is-invalid'));
+    document.querySelectorAll('.field-error.visible').forEach(e => { e.textContent = ''; e.classList.remove('visible'); });
+    document.querySelectorAll('.confirmacion-container.is-invalid').forEach(c => c.classList.remove('is-invalid'));
+}
+
+// Live validation — clear error on input
+['nombre', 'contacto', 'area', 'urgencia', 'problema'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+        const event = el.tagName === 'SELECT' ? 'change' : 'input';
+        el.addEventListener(event, () => clearFieldError(id, `error-${id}`));
     }
+});
+
+const confirmacionCheckbox = document.getElementById('confirmacion');
+if (confirmacionCheckbox) {
+    confirmacionCheckbox.addEventListener('change', () => {
+        const container = document.getElementById('group-confirmacion');
+        if (container) container.classList.remove('is-invalid');
+    });
 }
 
-/* ========== NAVBAR ========== */
-.navbar {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.65rem 1.5rem;
-    background: var(--bg-navbar);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border-bottom: 1px solid var(--border);
-    transition: all var(--t-base);
+// ============================================
+//  FORM SUBMISSION
+// ============================================
+
+const formulario = document.getElementById('formulario');
+if (formulario) {
+    formulario.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        clearAllErrors();
+
+        const nombre = nombreInput.value.trim();
+        const contacto = document.getElementById('contacto').value.trim();
+        const area = areaInput.value;
+        const urgencia = urgenciaInput ? urgenciaInput.value : '';
+        const problema = problemaInput.value.trim();
+        const confirmacion = document.getElementById('confirmacion').checked;
+        const respuesta = document.getElementById('respuesta');
+        const successOverlay = document.getElementById('success-overlay');
+        const submitBtn = document.getElementById('btnEnviarReporte');
+
+        let hasErrors = false;
+
+        if (nombre.length < 3 || !/^[a-zA-Z\u00e1\u00e9\u00ed\u00f3\u00fa\u00c1\u00c9\u00cd\u00d3\u00da\u00f1\u00d1\s]+$/.test(nombre)) {
+            setFieldError('nombre', 'error-nombre', 'Ingrese al menos 3 caracteres (solo letras)');
+            hasErrors = true;
+        }
+        if (contacto && !/^[\w.-]+@[\w.-]+\.[a-zA-Z]{2,}$/.test(contacto) && !/^\+?\d{8,15}$/.test(contacto)) {
+            setFieldError('contacto', 'error-contacto', 'Formato inv\u00e1lido (email o tel\u00e9fono)');
+            hasErrors = true;
+        }
+        if (!area) {
+            setFieldError('area', 'error-area', 'Seleccione un \u00e1rea');
+            hasErrors = true;
+        }
+        if (!urgencia) {
+            setFieldError('urgencia', 'error-urgencia', 'Seleccione la urgencia');
+            hasErrors = true;
+        }
+        if (problema.length < 10) {
+            setFieldError('problema', 'error-problema', 'Describa con al menos 10 caracteres');
+            hasErrors = true;
+        }
+        if (!confirmacion) {
+            const container = document.getElementById('group-confirmacion');
+            if (container) container.classList.add('is-invalid');
+            hasErrors = true;
+        }
+
+        if (hasErrors) {
+            showToast('Revise los campos marcados en rojo', 'error');
+            // Scroll to first error
+            const firstError = document.querySelector('.is-invalid');
+            if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        }
+
+        // All valid — send
+        submitBtn.disabled = true;
+        submitBtn.classList.add('btn--loading');
+
+        const now = new Date();
+        const ahora = now.toISOString();
+        const fechaFormateada = `${String(now.getDate()).padStart(2, '0')}-${String(now.getMonth() + 1).padStart(2, '0')}-${now.getFullYear()}`;
+
+        const datosReporte = {
+            nombre, contacto, area, urgencia, problema,
+            confirmacion: true,
+            fecha: fechaFormateada,
+            timestamp: ahora
+        };
+
+        // 1. Firebase
+        try {
+            await database.ref('reportes/').push(datosReporte);
+            console.log('\u2705 Firebase OK');
+        } catch (error) {
+            console.error('Firebase error:', error);
+            showToast('Error al guardar. Reintente.', 'error');
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('btn--loading');
+            return;
+        }
+
+        // 2. Google Sheets (backup)
+        try {
+            const datosParaSheets = new FormData();
+            datosParaSheets.append('nombre', nombre);
+            datosParaSheets.append('contacto', contacto);
+            datosParaSheets.append('area', area);
+            datosParaSheets.append('urgencia', urgencia);
+            datosParaSheets.append('fecha', fechaFormateada);
+            datosParaSheets.append('problema', problema);
+            datosParaSheets.append('timestamp', ahora);
+
+            const response = await fetch(googleSheetsURL, { method: 'POST', body: datosParaSheets });
+            const responseText = await response.text();
+            console.log('\u2705 Sheets:', responseText);
+        } catch (error) {
+            console.error('Sheets error:', error instanceof Error ? error.message : error);
+        }
+
+        // 3. Success animation
+        showToast('\u00a1Reporte enviado con \u00e9xito!', 'success', 5000);
+        formulario.style.display = 'none';
+        if (successOverlay) successOverlay.classList.add('visible');
+
+        // Reset after delay
+        setTimeout(() => {
+            formulario.style.display = '';
+            if (successOverlay) successOverlay.classList.remove('visible');
+            formulario.reset();
+            if (urgenciaInput) urgenciaInput.classList.remove('urgencia--bajo', 'urgencia--medio', 'urgencia--critico');
+            if (charCounter) { charCounter.textContent = '0 / 2000'; charCounter.classList.remove('near-limit', 'at-limit'); }
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('btn--loading');
+        }, 6000);
+    });
 }
 
-.navbar.scrolled {
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25), 0 0 40px rgba(6, 182, 212, 0.03);
-    border-bottom-color: var(--border-hover);
-}
+// ---- Dynamic Year ----
+const currentYearSpan = document.getElementById('current-year');
+if (currentYearSpan) currentYearSpan.textContent = new Date().getFullYear();
 
-[data-theme="light"] .navbar.scrolled {
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-}
+// ============================================
+//  CHATBOT ASSISTANT
+// ============================================
 
-.navbar-brand {
-    display: flex;
-    align-items: center;
-    gap: 0.65rem;
-}
+const chatFab = document.getElementById('chatbot-fab');
+const chatWindow = document.getElementById('chatbot-window');
+const chatMsgs = document.getElementById('chatbot-messages');
+const chatInput = document.getElementById('chatbot-input');
+const chatSend = document.getElementById('chatbot-send');
+const chatQR = document.getElementById('chatbot-quickreplies');
+const fabIconChat = document.getElementById('fab-icon-chat');
+const fabIconClose = document.getElementById('fab-icon-close');
+const fabBadge = document.getElementById('fab-badge');
 
-.navbar-logo-img {
-    height: 34px;
-    width: auto;
-    object-fit: contain;
-    flex-shrink: 0;
-}
+let chatOpen = false;
+let firstOpen = true;
 
-.navbar-title {
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    letter-spacing: 0.03em;
-}
+// ---- AI Configuration (via PHP proxy — key is server-side) ----
+const AI_PROXY_URL = 'https://cesfamtic.com/api/chat.php';
+const AI_MODEL = 'llama-3.3-70b-versatile';
 
-.navbar-sep {
-    color: var(--text-muted);
-    opacity: 0.5;
-    margin: 0 0.1rem;
-}
+const SYSTEM_PROMPT = `Eres el Asistente de TI del CESFAM Dr. Alfredo Gantz Mann, La Unión, Chile.
+Ayuda a funcionarios a resolver problemas técnicos. Responde en español, breve y amigable.
 
-.navbar-title--accent {
-    background: var(--accent-gradient-h);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    font-weight: 800;
-}
+SISTEMAS (URLs reales):
+- RAS: rasvaldivia.cl | contingencia.rasvaldivia.cl | IPs: 10.8.102.72, 10.8.102.74, 10.8.102.104
+- CORE: hbvaldivia.cl/core/ | IP: 10.6.206.62/core
+- Visor Exámenes: 10.66.50.47 | 10.4.59.246:90
+- SIGGES: nuevo.sigges.cl | sigges.cl
+- BOT SOME: bot.desamlu.cl
+- BloqueApp: cesfamtic.com/BloqueAPP/login.html
+- Intranet: intranetlaunion.smc.cl
+- Isatec: clientes.isatec.cl
+- Isis View: 10.6.67.166
+- Imed: licencia.cl
+- FONASA: fonasa.cl | frontintegrado.fonasa.cl
+- DART: teleoftalmologia.minsal.cl
+- Hospital Digital: interconsulta.minsal.cl
+- Prescripción: prescripcion-receta.minsal.cl
+- Derivación: cesfamlu.github.io/DerivacionDatos
+- Portal de Enlaces: cesfamlu.github.io/links
+- SURVIH: survih.minsal.cl
+- Chile Crece: srdm.crececontigo.gob.cl
+- Epivigilia: epivigila.minsal.cl
+- Correo: informacionescesfamlaunion@gmail.cl | SOME: some@munilaunion.cl
 
-.navbar-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
+REGLAS: Sé breve (máx 5 líneas). Da pasos numerados. Sugiere el formulario si necesita más ayuda. Usa emojis con moderación. NUNCA inventes URLs. Entiende el contexto antes de responder.`;
 
-/* ========== BUTTONS ========== */
-.btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1.1rem;
-    border: none;
-    border-radius: var(--r-sm);
-    font-family: inherit;
-    font-size: 0.8rem;
-    font-weight: 600;
-    cursor: pointer;
-    text-decoration: none;
-    transition: all var(--t-base);
-    position: relative;
-    overflow: hidden;
-    letter-spacing: 0.02em;
-}
+// Conversation history for AI context
+const conversationHistory = [];
 
-.btn--outline {
-    background: transparent;
-    color: var(--text-secondary);
-    border: 1px solid var(--border);
-}
+// Call AI via PHP proxy (no API key exposed in frontend)
+async function askAI(userMessage) {
+    conversationHistory.push({ role: 'user', content: userMessage });
 
-.btn--outline:hover {
-    color: var(--cyan-light);
-    border-color: var(--border-hover);
-    background: rgba(6, 182, 212, 0.06);
-    transform: translateY(-1px);
-    box-shadow: var(--glow-cyan);
-}
+    const messages = [
+        { role: 'system', content: SYSTEM_PROMPT },
+        ...conversationHistory.slice(-10)
+    ];
 
-.btn--primary {
-    background: var(--accent-gradient);
-    color: #fff;
-    border-radius: var(--r-md);
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-    background-size: 200% auto;
-}
+    const payload = {
+        model: AI_MODEL,
+        messages: messages,
+        temperature: 0.7,
+        max_tokens: 300
+    };
 
-.btn--cta {
-    width: 100%;
-    padding: 1rem 2rem;
-    font-size: 0.95rem;
-    font-weight: 800;
-    letter-spacing: 0.1em;
-    border-radius: var(--r-md);
-    margin-top: 0.5rem;
-    box-shadow: 0 4px 20px rgba(6, 182, 212, 0.2), 0 0 40px rgba(99, 102, 241, 0.08);
-    animation: shimmer 4s ease infinite;
-}
+    try {
+        const res = await fetch(AI_PROXY_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
 
-.btn--cta::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
-    transition: left 0.7s ease;
-}
+        if (res.status === 429) {
+            console.warn('⏳ Rate limited, waiting 5s...');
+            await new Promise(r => setTimeout(r, 5000));
+            const retry = await fetch(AI_PROXY_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (!retry.ok) throw new Error(`Retry failed: ${retry.status}`);
+            const retryData = await retry.json();
+            const retryText = retryData.choices?.[0]?.message?.content;
+            if (retryText) {
+                conversationHistory.push({ role: 'assistant', content: retryText });
+                return retryText;
+            }
+            throw new Error('Empty retry response');
+        }
 
-.btn--cta:hover {
-    transform: translateY(-3px) scale(1.01);
-    box-shadow: 0 8px 35px rgba(6, 182, 212, 0.35), 0 0 80px rgba(99, 102, 241, 0.15), 0 0 120px rgba(6, 182, 212, 0.08);
-}
+        if (!res.ok) {
+            const errText = await res.text();
+            console.error(`AI API HTTP ${res.status}:`, errText);
+            throw new Error(`HTTP ${res.status}`);
+        }
 
-.btn--cta:hover::before {
-    left: 100%;
-}
+        const data = await res.json();
+        const aiText = data.choices?.[0]?.message?.content;
+        if (!aiText) throw new Error('Empty response');
 
-.btn--cta:active {
-    transform: translateY(-1px) scale(0.99);
-    transition: transform 0.1s;
-}
+        conversationHistory.push({ role: 'assistant', content: aiText });
+        console.log('✅ AI responded OK');
+        return aiText;
+    } catch (err) {
+        console.error('AI error:', err.message);
 
-.btn--cta:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-}
+        const fallback = findBestMatch(userMessage);
+        if (fallback) {
+            conversationHistory.push({ role: 'assistant', content: fallback.response });
+            return fallback.response;
+        }
 
-/* Loading state */
-.btn--loading .btn-text {
-    visibility: hidden;
-}
-
-.btn--loading .btn-icon-svg {
-    visibility: hidden;
-}
-
-.btn--loading::after {
-    content: '';
-    position: absolute;
-    width: 24px;
-    height: 24px;
-    border: 3px solid rgba(255, 255, 255, 0.2);
-    border-top-color: #fff;
-    border-radius: 50%;
-    animation: spin 0.6s linear infinite;
-}
-
-/* Legacy spinner compat */
-.btn-spinner {
-    pointer-events: none;
-    color: transparent;
-}
-
-.btn-spinner::after {
-    content: '';
-    position: absolute;
-    width: 24px;
-    height: 24px;
-    border: 3px solid rgba(255, 255, 255, 0.2);
-    border-top-color: #fff;
-    border-radius: 50%;
-    animation: spin 0.6s linear infinite;
-}
-
-.btn-spinner svg,
-.btn-spinner span {
-    visibility: hidden;
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-@keyframes shimmer {
-    0% {
-        background-position: 0% center;
-    }
-
-    50% {
-        background-position: 100% center;
-    }
-
-    100% {
-        background-position: 0% center;
-    }
-}
-
-.btn-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 38px;
-    height: 38px;
-    background: transparent;
-    border: 1px solid var(--border);
-    border-radius: var(--r-sm);
-    color: var(--text-muted);
-    cursor: pointer;
-    transition: all var(--t-base);
-}
-
-.btn-icon:hover {
-    color: var(--cyan);
-    border-color: var(--border-hover);
-    background: rgba(6, 182, 212, 0.06);
-    transform: rotate(15deg) scale(1.08);
-    box-shadow: var(--glow-cyan);
-}
-
-/* ========== APP CONTAINER ========== */
-.app-container {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2.5rem 1rem;
-    position: relative;
-    z-index: 1;
-}
-
-/* ========== MAIN CARD ========== */
-.card {
-    width: 100%;
-    max-width: 720px;
-    background: var(--bg-surface);
-    backdrop-filter: blur(24px) saturate(150%);
-    -webkit-backdrop-filter: blur(24px) saturate(150%);
-    border: 1px solid var(--border-card);
-    border-radius: var(--r-xl);
-    padding: 3rem 3rem 2.5rem;
-    position: relative;
-    overflow: hidden;
-    box-shadow: var(--shadow-card);
-    transition: all var(--t-base);
-    animation: cardEntry 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* Noise grain texture for premium depth */
-.card::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    opacity: 0.02;
-    pointer-events: none;
-    border-radius: inherit;
-    z-index: 0;
-}
-
-.card>* {
-    position: relative;
-    z-index: 1;
-}
-
-.card__glow {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: var(--accent-gradient-h);
-    opacity: 0.85;
-    z-index: 2;
-}
-
-.card:hover {
-    border-color: rgba(6, 182, 212, 0.15);
-    box-shadow: var(--shadow-card), var(--glow-cyan);
-}
-
-@keyframes cardEntry {
-    from {
-        opacity: 0;
-        transform: translateY(30px) scale(0.97);
-        filter: blur(6px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-        filter: blur(0);
-    }
-}
-
-/* Card Header */
-.card__header {
-    text-align: center;
-    margin-bottom: 2.5rem;
-}
-
-.card__icon {
-    width: 60px;
-    height: 60px;
-    margin: 0 auto 1.2rem;
-    background: linear-gradient(135deg, rgba(6, 182, 212, 0.12), rgba(99, 102, 241, 0.08));
-    border: 1px solid rgba(6, 182, 212, 0.15);
-    border-radius: var(--r-lg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--cyan);
-    transition: all var(--t-base);
-}
-
-.card__icon:hover {
-    transform: scale(1.05) rotate(-3deg);
-    border-color: var(--cyan);
-    box-shadow: var(--glow-cyan);
-}
-
-.card__title {
-    font-size: 1.6rem;
-    font-weight: 800;
-    background: var(--accent-gradient-h);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    letter-spacing: -0.02em;
-    margin-bottom: 0.5rem;
-}
-
-.card__subtitle {
-    color: var(--text-secondary);
-    font-size: 0.88rem;
-    line-height: 1.65;
-    max-width: 480px;
-    margin: 0 auto;
-}
-
-/* ========== FORM SECTIONS ========== */
-.form-section {
-    margin-top: 1.8rem;
-    margin-bottom: 0.9rem;
-}
-
-.form-section:first-of-type {
-    margin-top: 0;
-}
-
-.form-section__label {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-size: 0.68rem;
-    font-weight: 700;
-    color: var(--cyan);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    padding: 0.25rem 0.7rem;
-    background: rgba(6, 182, 212, 0.06);
-    border: 1px solid rgba(6, 182, 212, 0.1);
-    border-radius: 20px;
-}
-
-[data-theme="light"] .form-section__label {
-    background: rgba(6, 182, 212, 0.08);
-}
-
-/* ========== FORM ========== */
-.form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.25rem;
-    margin-bottom: 0.3rem;
-}
-
-@media (max-width: 600px) {
-    .form-row {
-        grid-template-columns: 1fr;
+        return '⚠️ La IA no está disponible. Puedes:\n\n• Usar los **botones rápidos** de abajo\n• Visitar el **Portal de Enlaces** (cesfamlu.github.io/links)\n• O completar el **formulario de reporte**';
     }
 }
 
-.form-group {
-    margin-bottom: 1.1rem;
-    position: relative;
-}
+// ============================================
+//  KNOWLEDGE BASE
+// ============================================
 
-.form-group--full {
-    grid-column: 1 / -1;
-    margin-bottom: 1.2rem;
-}
+const knowledgeBase = [
+    {
+        keywords: ['internet', 'wifi', 'red', 'conexión', 'conexion', 'conectar', 'sin internet', 'no hay internet', 'no conecta', 'cable de red'],
+        response: '🌐 **Problemas de internet:** Intente estos pasos:\n\n1. Desconecte y reconecte el cable de red\n2. Reinicie el computador\n3. Verifique que el cable esté bien enchufado al puerto del PC y al del muro\n4. Si usa WiFi, olvide la red y vuelva a conectarse\n\n💡 Si no tiene internet, no podrá acceder al RAS por dominio, pero puede intentar acceder por IP directa (ej: 10.8.102.72)\n\nSi el problema persiste, complete el formulario indicando su área.',
+        quickReplies: ['RAS por IP', 'Llenar formulario', 'Otro problema']
+    },
+    {
+        keywords: ['impresora', 'imprimir', 'imprime', 'no imprime', 'papel', 'tinta', 'atasca', 'atascada', 'impresion', 'impresión', 'tóner', 'toner'],
+        response: '🖨️ **Problemas de impresora:** Verifique lo siguiente:\n\n1. ¿La impresora está encendida y con luz verde?\n2. ¿Tiene papel y tinta/tóner suficiente?\n3. Revise si hay papel atascado\n4. En su PC: Panel de Control → Impresoras → Verificar que la impresora correcta esté como predeterminada\n5. Pruebe apagar y encender la impresora\n\nSi sigue sin funcionar, envíe un reporte indicando el modelo de la impresora y su ubicación.',
+        quickReplies: ['No funciona aún', 'Llenar formulario', 'Otro problema']
+    },
+    {
+        keywords: ['contraseña', 'clave', 'password', 'olvidé', 'olvide', 'no puedo entrar', 'bloqueado', 'bloqueo', 'usuario', 'login', 'acceso', 'sesión', 'sesion'],
+        response: '🔑 **Problemas de contraseña/acceso:**\n\n• **Windows:** Contacte directamente a TI para reinicio de clave\n• **RAS:** Solicite reinicio de clave a través de TI\n• **SIGGES:** Use la opción "Recuperar contraseña" en la web\n• **Correo/Intranet:** Contacte a TI\n\n⚠️ Por seguridad, nunca comparta su contraseña. Complete el formulario para solicitar un reinicio de clave.',
+        quickReplies: ['RAS', 'SIGGES', 'Llenar formulario', 'Otro problema']
+    },
+    {
+        keywords: ['correo', 'email', 'mail', 'outlook', 'gmail', 'no envía', 'no envia', 'no recibe', 'bandeja'],
+        response: '📧 **Problemas de correo electrónico:**\n\n1. Verifique su conexión a internet\n2. Revise la carpeta de spam/no deseados\n3. Si usa Outlook, cierre y vuelva a abrir\n4. Verifique que el archivo adjunto no supere el límite (25MB)\n5. Pruebe acceder desde el navegador web\n\n📌 Correo institucional: informacionescesfamlaunion@gmail.cl\n📌 SOME: some@munilaunion.cl',
+        quickReplies: ['No funciona aún', 'Llenar formulario', 'Otro problema']
+    },
+    {
+        keywords: ['lento', 'lenta', 'demora', 'tarda', 'cuelga', 'congela', 'congelado', 'rendimiento', 'pc lento', 'computador lento', 'trabado'],
+        response: '🐌 **Computador lento:**\n\n1. Cierre los programas que no esté usando (RAS consume bastante RAM)\n2. Reinicie el computador (apagar completamente, esperar 30 seg, encender)\n3. Verifique que no haya actualizaciones pendientes\n4. Borre archivos temporales: Win+R → escriba "%temp%" → elimine todo\n5. Si el RAS va lento pero el PC funciona bien, pruebe un servidor alternativo\n\nSi se repite frecuentemente, envíe un reporte para evaluación.',
+        quickReplies: ['RAS lento', 'Llenar formulario', 'Otro problema']
+    },
+    {
+        keywords: ['captura de pantalla', 'captura', 'screenshot', 'pantallazo', 'recorte', 'snipping', 'imprimir pantalla'],
+        response: '📸 **Captura de pantalla en Windows:**\n\n1. **Win+Shift+S** → Herramienta de recorte (puede seleccionar área)\n2. **Tecla ImprPant** → Captura toda la pantalla al portapapeles\n3. **Alt+ImprPant** → Captura solo la ventana activa\n4. **Win+ImprPant** → Guarda automáticamente en Imágenes/Capturas\n\n💡 La captura queda en el portapapeles, péguelo con Ctrl+V en un correo, documento o en este formulario.',
+        quickReplies: ['Otra consulta', 'Llenar formulario']
+    },
+    {
+        keywords: ['monitor', 'no enciende', 'negro', 'negra', 'sin imagen', 'parpadea', 'display', 'resolución', 'resolucion', 'pantalla negra', 'pantalla parpadea'],
+        response: '🖥️ **Problemas de pantalla/monitor:**\n\n1. Verifique que el monitor esté encendido (luz indicadora)\n2. Revise los cables de video y alimentación\n3. Pruebe presionar Win+P para cambiar modo de proyección\n4. Si la pantalla parpadea, ajuste la resolución: click derecho en escritorio → Configuración de pantalla\n\nSi no se resuelve, indique el modelo del monitor en su reporte.',
+        quickReplies: ['Llenar formulario', 'Otro problema']
+    },
+    {
+        keywords: ['mouse', 'ratón', 'raton', 'teclado', 'keyboard', 'no responde', 'tecla', 'click'],
+        response: '🖱️ **Problemas de mouse/teclado:**\n\n1. Si es inalámbrico, verifique las pilas/batería\n2. Desconecte y reconecte el cable USB\n3. Pruebe en otro puerto USB\n4. Reinicie el computador\n5. Si es inalámbrico, re-sincronice con el receptor USB\n\nSi necesita un reemplazo, envíe un reporte.',
+        quickReplies: ['Llenar formulario', 'Otro problema']
+    },
+    {
+        keywords: ['programa', 'software', 'instalar', 'instalación', 'instalacion', 'aplicación', 'aplicacion', 'actualizar', 'actualización', 'actualizacion', 'error', 'falla', 'cierra solo', 'crash'],
+        response: '💻 **Problemas de software:**\n\n1. Cierre el programa y vuelva a abrirlo\n2. Reinicie el computador\n3. Si pide actualización, acepte e instale\n4. Si sale un error, anote o capture el mensaje exacto (Win+Shift+S para captura)\n\n⚠️ No instale software sin autorización de TI.\n\n📌 Encuentre los sistemas institucionales en el **Portal de Enlaces**.',
+        quickReplies: ['RAS', 'Portal de Enlaces', 'Llenar formulario', 'Otro problema']
+    },
+    {
+        keywords: ['ras', 'registro de atenciones', 'rasvaldivia', 'ficha', 'paciente', 'atención', 'atencion', 'ficha clínica', 'ficha clinica'],
+        response: '🏥 **Problemas con RAS (Registro de Atenciones de Salud):**\n\n1. Verifique su conexión a internet\n2. Pruebe cerrar sesión y volver a entrar\n3. Borre caché del navegador: Ctrl+Shift+Delete\n4. Pruebe con otro navegador (Chrome recomendado)\n\n**Servidores alternativos del RAS:**\n• Principal → rasvaldivia.cl\n• Contingencia → contingencia.rasvaldivia.cl\n• IP directa 1 → 10.8.102.72\n• IP directa 2 → 10.8.102.74\n• IP directa 3 → 10.8.102.104\n\n💡 Si el principal no carga, pruebe con las IPs directas.\nPuede encontrar todos los links en el **Portal de Enlaces**.',
+        quickReplies: ['Portal de Enlaces', 'Sigue sin funcionar', 'Llenar formulario', 'Otro problema']
+    },
+    {
+        keywords: ['core', 'examen', 'exámenes', 'examenes', 'laboratorio', 'resultado', 'visor'],
+        response: '🔬 **CORE / Visor de Exámenes:**\n\n**CORE** (gestión de exámenes):\n• Principal → hbvaldivia.cl/core/\n• IP directa → 10.6.206.62/core\n\n**Visor de Exámenes** (resultados de laboratorio):\n• Principal → 10.66.50.47\n• Contingencia → 10.4.59.246:90\n\nSi no puede acceder:\n1. Verifique su conexión de red\n2. Pruebe con la IP directa\n3. Borre caché del navegador\n\nTodos los links están en el **Portal de Enlaces**.',
+        quickReplies: ['Portal de Enlaces', 'Llenar formulario', 'Otro problema']
+    },
+    {
+        keywords: ['sigges', 'garantía', 'garantia', 'ges', 'auge'],
+        response: '📋 **SIGGES (Gestión de Garantías en Salud):**\n\n• Nuevo SIGGES → nuevo.sigges.cl\n• SIGGES clásico → sigges.cl\n\nSi tiene problemas de acceso:\n1. Verifique su conexión a internet\n2. Pruebe con otro navegador\n3. Si olvidó su clave, use "Recuperar contraseña" en la web\n\nEncuentre los links en el **Portal de Enlaces**.',
+        quickReplies: ['Portal de Enlaces', 'Llenar formulario', 'Otro problema']
+    },
+    {
+        keywords: ['licencia', 'imed', 'licencia médica', 'licencia medica'],
+        response: '📄 **Imed (Licencias Médicas Electrónicas):**\n\n• Acceso → licencia.cl\n\nSi tiene problemas:\n1. Asegúrese de usar su RUN y clave correcta\n2. Verifique que su certificado digital esté vigente (si aplica)\n3. Pruebe con otro navegador\n\nPara más herramientas, visite el **Portal de Enlaces**.',
+        quickReplies: ['Portal de Enlaces', 'Llenar formulario', 'Otro problema']
+    },
+    {
+        keywords: ['fonasa', 'front integrado', 'previsión', 'prevision', 'beneficiario'],
+        response: '💚 **FONASA:**\n\n• FONASA → fonasa.cl\n• Front Integrado → frontintegrado.fonasa.cl\n\nSi tiene problemas de acceso, verifique su conexión e intente con otro navegador.\n\nTodos los links están en el **Portal de Enlaces**.',
+        quickReplies: ['Portal de Enlaces', 'Llenar formulario', 'Otro problema']
+    },
+    {
+        keywords: ['intranet', 'comunicación', 'comunicacion', 'interno', 'comunicado'],
+        response: '📢 **Intranet (Comunicación Institucional):**\n\n• Acceso → intranetlaunion.smc.cl\n\nSi no puede acceder:\n1. Solicite sus credenciales a TI\n2. Verifique su conexión a internet\n3. Pruebe con otro navegador',
+        quickReplies: ['Llenar formulario', 'Otro problema']
+    },
+    {
+        keywords: ['isatec', 'soporte isatec', 'portal isatec', 'ticket isatec'],
+        response: '🔧 **Isatec (Soporte Técnico Externo):**\n\n• Portal de clientes → clientes.isatec.cl\n\nPara incidentes internos del CESFAM, use este formulario de reporte. Para temas de Isatec, acceda a su portal directamente.',
+        quickReplies: ['Llenar formulario', 'Portal de Enlaces', 'Otro problema']
+    },
+    {
+        keywords: ['vpn', 'remoto', 'teletrabajo', 'casa', 'acceso remoto', 'conexión remota', 'conexion remota'],
+        response: '🔒 **Acceso remoto / VPN:**\n\n1. Verifique que su internet de casa funcione\n2. Abra la aplicación VPN y conéctese\n3. Use las credenciales institucionales\n4. Si la VPN se desconecta, reinicie la aplicación\n\n💡 Con VPN activa puede acceder al RAS por IP directa.\n\nSi necesita habilitación de VPN, envíe un reporte.',
+        quickReplies: ['RAS por IP', 'Llenar formulario', 'Otro problema']
+    },
+    {
+        keywords: ['teléfono', 'telefono', 'fono', 'anexo', 'llamada', 'no suena', 'sin tono'],
+        response: '📞 **Problemas de telefonía:**\n\n1. Verifique que el teléfono esté conectado\n2. Levante el auricular y compruebe tono\n3. Si es IP, verifique el cable de red\n4. Revise que el volumen del timbre no esté en silencio\n\nPara solicitar cambio de anexo o reparación, complete el formulario.',
+        quickReplies: ['Llenar formulario', 'Otro problema']
+    },
+    {
+        keywords: ['portal', 'enlaces', 'links', 'sitios', 'páginas', 'paginas', 'herramientas', 'sistemas', 'plataformas'],
+        response: '🔗 **Portal de Enlaces del CESFAM:**\n\nTodos los sistemas y herramientas del CESFAM están disponibles en:\n👉 **cesfamlu.github.io/links**\n\nAhí encontrará acceso rápido a:\n• RAS (principal, contingencia e IPs)\n• CORE y Visor de Exámenes\n• SIGGES, FONASA, Imed\n• Intranet, BloqueApp, BOT SOME\n• Hospital Digital, DART, Epivigilia\n• Y mucho más\n\nTambién puede acceder desde el botón **"Portal de Enlaces"** en la barra superior.',
+        quickReplies: ['RAS', 'CORE', 'SIGGES', 'Otro problema']
+    },
+    {
+        keywords: ['bloque', 'bloqueapp', 'agenda', 'hora', 'bloqueo de agenda'],
+        response: '📅 **BloqueApp (Gestión de Bloqueos de Agenda):**\n\n• Acceso → cesfamtic.com/BloqueAPP/login.html\n\nSi tiene problemas de acceso, solicite sus credenciales a TI.\nEncuentre todos los links en el **Portal de Enlaces**.',
+        quickReplies: ['Portal de Enlaces', 'Llenar formulario', 'Otro problema']
+    },
+    {
+        keywords: ['some', 'bot some', 'bot de some'],
+        response: '🤖 **BOT SOME:**\n\n• Acceso → bot.desamlu.cl/login.php\n\nSi tiene problemas de acceso, solicite sus credenciales.\nPara temas de SOME contacte: some@munilaunion.cl',
+        quickReplies: ['Portal de Enlaces', 'Llenar formulario', 'Otro problema']
+    },
+    {
+        keywords: ['derivación', 'derivacion', 'derivar', 'interconsulta'],
+        response: '📋 **Datos de Derivación:**\n\n• Plataforma → cesfamlu.github.io/DerivacionDatos\n• Hospital Digital (interconsultas) → interconsulta.minsal.cl\n\nAhí encontrará datos útiles para completar las derivaciones correctamente.',
+        quickReplies: ['Portal de Enlaces', 'Llenar formulario', 'Otro problema']
+    },
+    {
+        keywords: ['isis', 'radiología', 'radiologia', 'imagen', 'rayos', 'rayo'],
+        response: '📷 **Isis View (Imágenes Médicas y Radiología):**\n\n• Acceso → 10.6.67.166 (solo red interna)\n\nEste sistema solo funciona dentro de la red del CESFAM. Si no puede acceder, verifique su conexión de red.',
+        quickReplies: ['Llenar formulario', 'Portal de Enlaces', 'Otro problema']
+    },
+    {
+        keywords: ['dart', 'oftalmología', 'oftalmologia', 'retino', 'retinopatía', 'retinopatia', 'teleoftalmología', 'teleoftalmologia'],
+        response: '👁️ **DART (Teleoftalmología):**\n\n• Acceso → teleoftalmologia.minsal.cl\n\nPlataforma del MINSAL para retinopatía diabética. Si tiene problemas de acceso, verifique su conexión a internet y credenciales.',
+        quickReplies: ['Portal de Enlaces', 'Llenar formulario', 'Otro problema']
+    },
+    {
+        keywords: ['receta', 'prescripción', 'prescripcion', 'medicamento', 'remedio'],
+        response: '💊 **Prescripción de Receta MINSAL:**\n\n• Acceso → prescripcion-receta.minsal.cl\n\nSi tiene problemas de acceso, verifique su conexión a internet e intente con otro navegador.',
+        quickReplies: ['Portal de Enlaces', 'Llenar formulario', 'Otro problema']
+    },
+    {
+        keywords: ['chile crece', 'crece contigo', 'desarrollo infantil'],
+        response: '👶 **Chile Crece Contigo:**\n\n• Acceso → srdm.crececontigo.gob.cl\n\nPrograma de desarrollo infantil temprano. Si tiene problemas de acceso, verifique su conexión e intente con otro navegador.',
+        quickReplies: ['Portal de Enlaces', 'Llenar formulario', 'Otro problema']
+    },
+    {
+        keywords: ['epivigilia', 'epivigila', 'vigilancia', 'epidemiología', 'epidemiologia', 'brote'],
+        response: '🦠 **Epivigilia (Vigilancia Epidemiológica):**\n\n• Acceso → epivigila.minsal.cl\n\nPlataforma del MINSAL para notificación y seguimiento epidemiológico. Si tiene problemas, verifique su conexión a internet y credenciales.',
+        quickReplies: ['Portal de Enlaces', 'Llenar formulario', 'Otro problema']
+    },
+    {
+        keywords: ['survih', 'vih', 'sida'],
+        response: '🔬 **SURVIH (Sistema de Registro Único de VIH):**\n\n• Acceso → survih.minsal.cl\n\nSistema del MINSAL para registro de VIH. Si tiene problemas de acceso, verifique su conexión y credenciales.',
+        quickReplies: ['Portal de Enlaces', 'Llenar formulario', 'Otro problema']
+    }
+];
 
-.form-label {
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: var(--text-label);
-    margin-bottom: 0.5rem;
-    letter-spacing: 0.02em;
-    transition: all var(--t-base);
-}
+// Match user input to knowledge base
+function findBestMatch(input) {
+    const normalized = input.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    let bestMatch = null;
+    let bestScore = 0;
 
-.form-group:focus-within .form-label {
-    color: var(--cyan);
-}
-
-.required {
-    color: var(--error);
-    margin-left: 2px;
-}
-
-.optional {
-    color: var(--text-muted);
-    font-weight: 400;
-    font-size: 0.72rem;
-}
-
-/* Inputs */
-.form-control {
-    width: 100%;
-    padding: 0.82rem 1rem;
-    min-height: 50px;
-    background: var(--bg-input);
-    border: 1.5px solid var(--border);
-    border-radius: var(--r-md);
-    color: var(--text-primary);
-    font-family: inherit;
-    font-size: 0.9rem;
-    transition: all var(--t-base);
-    outline: none;
-    -webkit-appearance: none;
-    appearance: none;
-}
-
-.form-control::placeholder {
-    color: var(--text-placeholder);
-    font-weight: 400;
-}
-
-.form-control:hover {
-    border-color: var(--border-hover);
-    background: var(--bg-input-hover);
-}
-
-.form-control:focus {
-    background: var(--bg-input-focus);
-    border-color: var(--border-focus);
-    box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.1), 0 0 25px rgba(6, 182, 212, 0.06);
-}
-
-/* Invalid field */
-.form-control.is-invalid {
-    border-color: var(--error) !important;
-    box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.1) !important;
-    animation: fieldShake 0.4s ease;
-}
-
-@keyframes fieldShake {
-
-    0%,
-    100% {
-        transform: translateX(0);
+    for (const entry of knowledgeBase) {
+        let score = 0;
+        for (const kw of entry.keywords) {
+            const kwNorm = kw.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            if (normalized.includes(kwNorm)) {
+                score += kwNorm.length;
+            }
+        }
+        if (score > bestScore) {
+            bestScore = score;
+            bestMatch = entry;
+        }
     }
 
-    15% {
-        transform: translateX(-5px);
+    return bestScore > 0 ? bestMatch : null;
+}
+
+// Add message to chat
+function addMessage(text, sender) {
+    const msg = document.createElement('div');
+    msg.className = `chat-msg ${sender}`;
+    msg.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+    chatMsgs.appendChild(msg);
+    chatMsgs.scrollTop = chatMsgs.scrollHeight;
+}
+
+// Show typing indicator
+function showTyping() {
+    const typing = document.createElement('div');
+    typing.className = 'typing-indicator';
+    typing.id = 'typing-dots';
+    typing.innerHTML = '<span></span><span></span><span></span>';
+    chatMsgs.appendChild(typing);
+    chatMsgs.scrollTop = chatMsgs.scrollHeight;
+}
+
+function removeTyping() {
+    const t = document.getElementById('typing-dots');
+    if (t) t.remove();
+}
+
+// Set quick reply buttons
+function setQuickReplies(replies) {
+    chatQR.innerHTML = '';
+    if (!replies || replies.length === 0) return;
+    replies.forEach(text => {
+        const btn = document.createElement('button');
+        btn.className = 'quick-reply-btn';
+        btn.textContent = text;
+        btn.addEventListener('click', () => handleUserInput(text));
+        chatQR.appendChild(btn);
+    });
+}
+
+// Handle user input
+function handleUserInput(text) {
+    if (!text.trim()) return;
+
+    addMessage(text, 'user');
+    chatInput.value = '';
+    chatQR.innerHTML = '';
+
+    // Special action: fill form
+    if (text.toLowerCase().includes('llenar formulario') || text.toLowerCase().includes('completar formulario')) {
+        showTyping();
+        setTimeout(() => {
+            removeTyping();
+            addMessage('¡Perfecto! Te llevo al formulario. Recuerda completar todos los campos con asterisco (*). Describe el problema con el mayor detalle posible para que podamos ayudarte más rápido. 📝', 'bot');
+            setQuickReplies(['Gracias', 'Otra consulta']);
+
+            document.getElementById('nombre').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(() => document.getElementById('nombre').focus(), 600);
+        }, 800);
+        return;
     }
 
-    30% {
-        transform: translateX(5px);
+    // Special: RAS por IP
+    if (/ras\s*(por\s*)?ip/i.test(text.trim()) || text.trim().toLowerCase() === 'ras lento') {
+        showTyping();
+        setTimeout(() => {
+            removeTyping();
+            addMessage('🏥 **Servidores RAS por IP directa:**\n\n• IP 1 → **10.8.102.72**\n• IP 2 → **10.8.102.74**\n• IP 3 → **10.8.102.104**\n• Contingencia → contingencia.rasvaldivia.cl\n\n💡 Copie la IP en la barra del navegador. Si ninguna funciona, puede ser un problema de red general.', 'bot');
+            setQuickReplies(['Sigue sin funcionar', 'Llenar formulario', 'Otro problema']);
+        }, 700);
+        return;
     }
 
-    45% {
-        transform: translateX(-4px);
+    // Special: Portal de Enlaces
+    if (/portal\s*de\s*enlaces/i.test(text.trim())) {
+        showTyping();
+        setTimeout(() => {
+            removeTyping();
+            addMessage('🔗 **Portal de Enlaces del CESFAM:**\n\n👉 **cesfamlu.github.io/links**\n\nAhí encontrará todos los sistemas:\n• RAS, CORE, Visor de Exámenes\n• SIGGES, FONASA, Imed\n• BloqueApp, BOT SOME, Intranet\n• Hospital Digital, DART, y más\n\nTambién puede acceder desde el botón "Portal de Enlaces" en la barra de navegación.', 'bot');
+            setQuickReplies(['RAS', 'CORE', 'SIGGES', 'Otro problema']);
+        }, 600);
+        return;
     }
 
-    60% {
-        transform: translateX(4px);
+    // Special: Sigue sin funcionar
+    if (/sigue sin funcionar|no funciona a[uú]n|ya lo intent[eé]/i.test(text.trim())) {
+        showTyping();
+        setTimeout(() => {
+            removeTyping();
+            addMessage('😓 Lamento que no se haya solucionado. Te recomiendo enviar un **reporte formal** a través del formulario para que nuestro equipo de TI pueda asistirte directamente.\n\nRecuerda incluir:\n• Descripción detallada del problema\n• Qué pasos ya intentaste\n• Tu área y datos de contacto', 'bot');
+            setQuickReplies(['Llenar formulario', 'Otra consulta']);
+        }, 700);
+        return;
     }
 
-    75% {
-        transform: translateX(-2px);
+    // Special: greetings
+    if (/^(hola|buenas|buen[oa]s?\s*(días|tardes|noches|dia)|hey|hi|qué tal|que tal|saludos)/i.test(text.trim())) {
+        showTyping();
+        setTimeout(() => {
+            removeTyping();
+            addMessage('¡Hola! 👋 Soy el asistente de TI del CESFAM. ¿En qué puedo ayudarte hoy?', 'bot');
+            setQuickReplies(['Internet', 'Impresora', 'Contraseña', 'PC lento', 'RAS', 'Portal de Enlaces']);
+        }, 600);
+        return;
     }
 
-    90% {
-        transform: translateX(2px);
-    }
-}
-
-/* Field error text */
-.field-error {
-    display: none;
-    font-size: 0.7rem;
-    color: var(--error);
-    margin-top: 0.35rem;
-    font-weight: 500;
-    animation: fadeSlideDown 0.25s ease;
-}
-
-.field-error.visible {
-    display: block;
-}
-
-@keyframes fadeSlideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-4px);
+    // Special: thanks
+    if (/^(gracias|muchas gracias|thanks|genial|perfecto|excelente|ok|dale|buena)/i.test(text.trim())) {
+        showTyping();
+        setTimeout(() => {
+            removeTyping();
+            addMessage('¡De nada! 😊 Si necesitas algo más, no dudes en preguntar. Estoy aquí para ayudar.', 'bot');
+            setQuickReplies(['Otra consulta', 'Llenar formulario']);
+        }, 500);
+        return;
     }
 
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Select */
-.form-select {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%2306b6d4' stroke-width='2' stroke-linecap='round' viewBox='0 0 24 24'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 1rem center;
-    background-size: 14px;
-    padding-right: 2.8rem;
-    cursor: pointer;
-}
-
-.form-select option {
-    background: var(--bg-body);
-    color: var(--text-primary);
-}
-
-/* Urgency colors */
-.urgencia-select.urgencia--bajo {
-    border-color: var(--urg-low);
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.08);
-}
-
-.urgencia-select.urgencia--medio {
-    border-color: var(--urg-med);
-    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.08);
-}
-
-.urgencia-select.urgencia--critico {
-    border-color: var(--urg-crit);
-    box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.1);
-}
-
-textarea.form-control {
-    resize: vertical;
-    min-height: 140px;
-    line-height: 1.65;
-}
-
-/* Textarea footer */
-.textarea-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-top: 0.35rem;
-    min-height: 1.2em;
-}
-
-.char-counter {
-    font-size: 0.68rem;
-    color: var(--text-muted);
-    font-weight: 500;
-    letter-spacing: 0.02em;
-    transition: color var(--t-base);
-    margin-left: auto;
-}
-
-.char-counter.near-limit {
-    color: var(--warning);
-}
-
-.char-counter.at-limit {
-    color: var(--error);
-    font-weight: 700;
-}
-
-/* ========== CHECKBOX ========== */
-.confirmacion-container {
-    display: flex;
-    align-items: center;
-    gap: 0.85rem;
-    padding: 1rem 1.2rem;
-    background: var(--bg-input);
-    border: 1.5px solid var(--border);
-    border-radius: var(--r-md);
-    cursor: pointer;
-    transition: all var(--t-base);
-    margin-bottom: 1.5rem;
-    margin-top: 0.3rem;
-}
-
-.confirmacion-container:hover {
-    border-color: var(--border-hover);
-    background: var(--bg-input-hover);
-}
-
-.confirmacion-container.is-invalid {
-    border-color: var(--error) !important;
-    animation: fieldShake 0.4s ease;
-}
-
-.checkbox {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 22px;
-    height: 22px;
-    min-width: 22px;
-    border: 2px solid var(--border);
-    border-radius: 7px;
-    cursor: pointer;
-    transition: all var(--t-spring);
-    position: relative;
-    background: transparent;
-}
-
-.checkbox:hover {
-    border-color: var(--cyan);
-}
-
-.checkbox:checked {
-    background: var(--accent-gradient);
-    border-color: transparent;
-    box-shadow: 0 0 15px rgba(6, 182, 212, 0.35);
-    transform: scale(1.08);
-}
-
-.checkbox:checked::after {
-    content: '';
-    position: absolute;
-    left: 5.5px;
-    top: 2px;
-    width: 7px;
-    height: 11px;
-    border: solid #fff;
-    border-width: 0 2.5px 2.5px 0;
-    transform: rotate(45deg);
-    animation: checkPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-@keyframes checkPop {
-    from {
-        transform: rotate(45deg) scale(0);
-        opacity: 0;
+    // Special: another query
+    if (/otra\s*consulta|otro\s*problema|volver|menu|menú/i.test(text.trim())) {
+        showTyping();
+        setTimeout(() => {
+            removeTyping();
+            addMessage('Claro, ¿en qué más puedo ayudarte? Selecciona una categoría o escribe tu problema:', 'bot');
+            setQuickReplies(['Internet', 'Impresora', 'RAS', 'PC lento', 'Correo', 'SIGGES', 'Portal de Enlaces', 'Teléfono']);
+        }, 500);
+        return;
     }
 
-    to {
-        transform: rotate(45deg) scale(1);
-        opacity: 1;
-    }
-}
+    // ---- AI-First Strategy ----
+    const inputLower = text.trim().toLowerCase();
+    const isQuickReply = knowledgeBase.some(entry =>
+        entry.keywords.some(kw => kw.toLowerCase() === inputLower)
+    );
 
-.checkbox-label {
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    cursor: pointer;
-    user-select: none;
-}
-
-/* ========== SUCCESS OVERLAY ========== */
-.success-overlay {
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 3rem 2rem;
-    text-align: center;
-}
-
-.success-overlay.visible {
-    display: flex;
-    animation: fadeIn 0.5s ease;
-}
-
-.success-check {
-    width: 80px;
-    height: 80px;
-    margin-bottom: 1.5rem;
-}
-
-.success-circle {
-    stroke-dasharray: 226;
-    stroke-dashoffset: 226;
-    animation: drawCircle 0.6s ease 0.2s forwards;
-}
-
-.success-path {
-    stroke-dasharray: 60;
-    stroke-dashoffset: 60;
-    animation: drawCheck 0.4s ease 0.7s forwards;
-}
-
-@keyframes drawCircle {
-    to {
-        stroke-dashoffset: 0;
-    }
-}
-
-@keyframes drawCheck {
-    to {
-        stroke-dashoffset: 0;
-    }
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
+    if (isQuickReply) {
+        const match = findBestMatch(text);
+        if (match) {
+            showTyping();
+            const delay = 400 + Math.random() * 300;
+            setTimeout(() => {
+                removeTyping();
+                addMessage(match.response, 'bot');
+                setQuickReplies(match.quickReplies);
+            }, delay);
+            return;
+        }
     }
 
-    to {
-        opacity: 1;
+    // Everything else → Groq AI
+    showTyping();
+    askAI(text).then(aiResponse => {
+        removeTyping();
+        addMessage(aiResponse, 'bot');
+        setQuickReplies(['Portal de Enlaces', 'Llenar formulario', 'Otra consulta']);
+    });
+}
+
+// Toggle chat window
+chatFab.addEventListener('click', () => {
+    chatOpen = !chatOpen;
+    if (chatOpen) {
+        chatWindow.classList.add('open');
+        fabIconChat.style.display = 'none';
+        fabIconClose.style.display = 'block';
+        fabBadge.classList.add('hidden');
+        chatInput.focus();
+
+        if (firstOpen) {
+            firstOpen = false;
+            setTimeout(() => {
+                addMessage('¡Hola! 👋 Soy el **Asistente de TI** del CESFAM. Antes de enviar un reporte, quizás pueda ayudarte a resolver tu problema.\n\n¿Qué tipo de incidente tienes?', 'bot');
+                setQuickReplies(['Internet', 'Impresora', 'RAS', 'PC lento', 'Correo', 'Portal de Enlaces', 'Otro problema']);
+            }, 400);
+        }
+    } else {
+        chatWindow.classList.remove('open');
+        fabIconChat.style.display = 'block';
+        fabIconClose.style.display = 'none';
     }
-}
+});
 
-.success-text {
-    font-size: 1.15rem;
-    font-weight: 700;
-    background: var(--accent-gradient-h);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 0.3rem;
-}
+// Send on button click
+chatSend.addEventListener('click', () => {
+    handleUserInput(chatInput.value);
+});
 
-.success-sub {
-    color: var(--text-secondary);
-    font-size: 0.85rem;
-}
-
-/* ========== RESPONSE ========== */
-.response-area {
-    text-align: center;
-    margin-top: 1.2rem;
-}
-
-.text-danger {
-    color: var(--error) !important;
-    font-size: 0.84rem;
-    line-height: 1.7;
-}
-
-.text-success {
-    color: var(--success) !important;
-    font-size: 0.84rem;
-}
-
-/* ========== FOOTER ========== */
-.footer {
-    text-align: center;
-    padding: 1.5rem 1rem;
-    color: var(--text-muted);
-    font-size: 0.7rem;
-    border-top: 1px solid var(--border);
-    background: var(--bg-navbar);
-    backdrop-filter: blur(12px);
-    position: relative;
-    z-index: 1;
-    letter-spacing: 0.02em;
-}
-
-.footer p {
-    margin: 0.15rem 0;
-}
-
-.footer-sep {
-    margin: 0 0.4rem;
-    opacity: 0.5;
-}
-
-.footer a {
-    color: var(--text-muted);
-    text-decoration: none;
-    transition: color var(--t-base);
-}
-
-.footer a:hover {
-    color: var(--cyan);
-}
-
-/* ========== CHATBOT ========== */
-.chatbot-fab {
-    position: fixed;
-    bottom: 1.5rem;
-    right: 1.5rem;
-    width: 58px;
-    height: 58px;
-    background: var(--accent-gradient);
-    border: none;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 900;
-    color: #fff;
-    box-shadow: 0 6px 24px rgba(6, 182, 212, 0.35), 0 0 50px rgba(99, 102, 241, 0.1);
-    transition: all var(--t-base);
-    animation: fabPulse 3s ease-in-out infinite;
-}
-
-.chatbot-fab:hover {
-    transform: scale(1.1);
-    box-shadow: 0 8px 30px rgba(6, 182, 212, 0.45), 0 0 70px rgba(99, 102, 241, 0.15);
-    animation: none;
-}
-
-.chatbot-fab:active {
-    transform: scale(0.95);
-}
-
-@keyframes fabPulse {
-
-    0%,
-    100% {
-        box-shadow: 0 6px 24px rgba(6, 182, 212, 0.35), 0 0 50px rgba(99, 102, 241, 0.1);
+// Send on Enter
+chatInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        handleUserInput(chatInput.value);
     }
-
-    50% {
-        box-shadow: 0 6px 24px rgba(6, 182, 212, 0.45), 0 0 70px rgba(99, 102, 241, 0.2);
-    }
-}
-
-.fab-badge {
-    position: absolute;
-    top: -4px;
-    right: -4px;
-    width: 21px;
-    height: 21px;
-    background: var(--error);
-    color: #fff;
-    font-size: 0.65rem;
-    font-weight: 700;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid var(--bg-body);
-    animation: badgePop 0.4s var(--t-spring);
-}
-
-.fab-badge.hidden {
-    display: none;
-}
-
-@keyframes badgePop {
-    from {
-        transform: scale(0);
-    }
-
-    to {
-        transform: scale(1);
-    }
-}
-
-.chatbot-window {
-    position: fixed;
-    bottom: 6.5rem;
-    right: 1.5rem;
-    width: 380px;
-    max-height: 520px;
-    background: var(--bg-surface);
-    backdrop-filter: blur(24px) saturate(150%);
-    -webkit-backdrop-filter: blur(24px) saturate(150%);
-    border: 1px solid var(--border-card);
-    border-radius: var(--r-xl);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), var(--glow-indigo);
-    display: none;
-    flex-direction: column;
-    overflow: hidden;
-    z-index: 901;
-    animation: chatSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.chatbot-window.open {
-    display: flex;
-}
-
-@keyframes chatSlideUp {
-    from {
-        opacity: 0;
-        transform: translateY(16px) scale(0.95);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-.chatbot-header {
-    display: flex;
-    align-items: center;
-    gap: 0.7rem;
-    padding: 0.95rem 1.15rem;
-    background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(99, 102, 241, 0.06));
-    border-bottom: 1px solid var(--border);
-}
-
-.chatbot-header-avatar {
-    width: 38px;
-    height: 38px;
-    min-width: 38px;
-    background: var(--accent-gradient);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-}
-
-.chatbot-header-info {
-    display: flex;
-    flex-direction: column;
-}
-
-.chatbot-header-name {
-    font-weight: 700;
-    font-size: 0.88rem;
-    color: var(--text-primary);
-}
-
-.chatbot-header-status {
-    font-size: 0.67rem;
-    color: var(--success);
-    font-weight: 500;
-}
-
-.chatbot-messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: 1rem 1rem 0.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.55rem;
-    min-height: 190px;
-    max-height: 290px;
-}
-
-.chatbot-messages::-webkit-scrollbar {
-    width: 3px;
-}
-
-.chatbot-messages::-webkit-scrollbar-thumb {
-    background: var(--border);
-    border-radius: 3px;
-}
-
-.chat-msg {
-    max-width: 85%;
-    padding: 0.65rem 0.9rem;
-    border-radius: var(--r-md);
-    font-size: 0.82rem;
-    line-height: 1.55;
-    animation: msgSlide 0.25s ease;
-    word-wrap: break-word;
-}
-
-@keyframes msgSlide {
-    from {
-        opacity: 0;
-        transform: translateY(6px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.chat-msg.bot {
-    align-self: flex-start;
-    background: rgba(6, 182, 212, 0.08);
-    border: 1px solid rgba(6, 182, 212, 0.1);
-    color: var(--text-primary);
-    border-bottom-left-radius: 4px;
-}
-
-.chat-msg.user {
-    align-self: flex-end;
-    background: var(--accent-gradient);
-    color: #fff;
-    border-bottom-right-radius: 4px;
-    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.12);
-}
-
-.typing-indicator {
-    display: flex;
-    gap: 4px;
-    padding: 0.7rem 0.9rem;
-    align-self: flex-start;
-}
-
-.typing-indicator span {
-    width: 7px;
-    height: 7px;
-    background: var(--cyan);
-    border-radius: 50%;
-    animation: typingBounce 1.2s ease-in-out infinite;
-    opacity: 0.4;
-}
-
-.typing-indicator span:nth-child(2) {
-    animation-delay: 0.15s;
-}
-
-.typing-indicator span:nth-child(3) {
-    animation-delay: 0.3s;
-}
-
-@keyframes typingBounce {
-
-    0%,
-    60%,
-    100% {
-        transform: translateY(0);
-        opacity: 0.4;
-    }
-
-    30% {
-        transform: translateY(-5px);
-        opacity: 1;
-    }
-}
-
-.chatbot-quickreplies {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    padding: 0.5rem 1rem;
-    border-top: 1px solid rgba(6, 182, 212, 0.05);
-}
-
-.chatbot-quickreplies:empty {
-    display: none;
-    padding: 0;
-}
-
-.quick-reply-btn {
-    padding: 0.35rem 0.7rem;
-    background: rgba(6, 182, 212, 0.06);
-    border: 1px solid rgba(6, 182, 212, 0.12);
-    border-radius: 20px;
-    color: var(--cyan);
-    font-family: inherit;
-    font-size: 0.72rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all var(--t-base);
-    white-space: nowrap;
-}
-
-.quick-reply-btn:hover {
-    background: rgba(6, 182, 212, 0.14);
-    border-color: var(--cyan);
-    transform: translateY(-1px);
-}
-
-.chatbot-input-bar {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.7rem 0.9rem;
-    border-top: 1px solid var(--border);
-    background: rgba(14, 20, 36, 0.4);
-}
-
-[data-theme="light"] .chatbot-input-bar {
-    background: rgba(235, 239, 250, 0.6);
-}
-
-.chatbot-input {
-    flex: 1;
-    padding: 0.6rem 0.85rem;
-    min-height: 42px;
-    background: var(--bg-input-hover);
-    border: 1.5px solid var(--border);
-    border-radius: var(--r-sm);
-    color: var(--text-primary);
-    font-family: inherit;
-    font-size: 0.82rem;
-    outline: none;
-    transition: all var(--t-base);
-}
-
-.chatbot-input::placeholder {
-    color: var(--text-placeholder);
-}
-
-.chatbot-input:focus {
-    border-color: var(--border-focus);
-    box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
-    background: var(--bg-input-focus);
-}
-
-.chatbot-send {
-    width: 38px;
-    height: 38px;
-    min-width: 38px;
-    background: var(--accent-gradient);
-    border: none;
-    border-radius: var(--r-sm);
-    color: #fff;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all var(--t-base);
-}
-
-.chatbot-send:hover {
-    transform: scale(1.06);
-    box-shadow: 0 4px 14px rgba(6, 182, 212, 0.3);
-}
-
-/* ========== RESPONSIVE ========== */
-@media (max-width: 700px) {
-    .card {
-        padding: 2rem 1.5rem;
-        border-radius: var(--r-lg);
-        margin: 0 0.5rem;
-    }
-
-    .card__title {
-        font-size: 1.35rem;
-    }
-
-    .app-container {
-        padding: 1.5rem 0.5rem;
-    }
-
-    .navbar {
-        padding: 0.6rem 1rem;
-    }
-
-    .navbar-title {
-        font-size: 0.75rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .card {
-        padding: 1.5rem 1.1rem;
-        border-radius: var(--r-md);
-    }
-
-    .card__title {
-        font-size: 1.2rem;
-    }
-
-    .card__subtitle {
-        font-size: 0.8rem;
-    }
-
-    .btn--cta {
-        font-size: 0.85rem;
-        padding: 0.85rem 1.5rem;
-    }
-
-    .chatbot-window {
-        width: calc(100% - 1.5rem);
-        right: 0.75rem;
-        bottom: 5.5rem;
-        max-height: 65vh;
-        border-radius: var(--r-lg);
-    }
-
-    .chatbot-fab {
-        width: 52px;
-        height: 52px;
-        bottom: 1rem;
-        right: 1rem;
-    }
-
-    .navbar-logo-img {
-        height: 28px;
-    }
-
-    .toast {
-        font-size: 0.78rem;
-        padding: 0.65rem 1rem;
-    }
-}
+});
