@@ -1,92 +1,277 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="dark">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" href="https://placehold.co/32x32/6a5acd/FFFFFF?text=R" type="image/x-icon">
-  <title>Plataforma de Reporte Técnico Profesional</title>
+  <meta name="description"
+    content="Mesa de Ayuda TI — CESFAM Dr. Alfredo Gantz Mann. Reporte incidentes técnicos de forma rápida y segura.">
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%2306b6d4'/><text x='16' y='22' text-anchor='middle' fill='white' font-size='16' font-weight='bold' font-family='sans-serif'>TI</text></svg>">
+  <title>Mesa de Ayuda TI · CESFAM La Unión</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
 
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/@phosphor-icons/web"></script>
-  
-   <link rel="stylesheet" href="css/style.css">
-  </head>
+<body>
+  <!-- Animated background -->
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-orb bg-orb--1" aria-hidden="true"></div>
+  <div class="bg-orb bg-orb--2" aria-hidden="true"></div>
+  <div class="bg-orb bg-orb--3" aria-hidden="true"></div>
 
-<body> 
-  <nav class="navbar">
-    <div class="navbar-controls ms-auto"> <a href="http://cesfamlu.github.io/links" target="_blank" class="btn-custom">Portal de Enlaces</a>
-        <button id="theme-toggle-button" title="Cambiar tema">
-            <i class="ph ph-sun"></i> 
-        </button>
+  <!-- Toast container -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- Navbar -->
+  <nav class="navbar" id="navbar">
+    <div class="navbar-brand">
+      <img src="img/logo.png" alt="Logo CESFAM" class="navbar-logo-img" onerror="this.style.display='none'">
+      <span class="navbar-title">CESFAM <span class="navbar-sep">|</span> <span class="navbar-title--accent">Soporte
+          TI</span></span>
+    </div>
+    <div class="navbar-actions">
+      <a href="http://cesfamlu.github.io/links" target="_blank" class="btn btn--outline">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+          <polyline points="15 3 21 3 21 9" />
+          <line x1="10" y1="14" x2="21" y2="3" />
+        </svg>
+        Portal de Enlaces
+      </a>
+      <button id="theme-toggle-button" class="btn-icon" title="Cambiar tema" aria-label="Cambiar tema">
+        <svg id="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5" />
+          <line x1="12" y1="1" x2="12" y2="3" />
+          <line x1="12" y1="21" x2="12" y2="23" />
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+          <line x1="1" y1="12" x2="3" y2="12" />
+          <line x1="21" y1="12" x2="23" y2="12" />
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+        </svg>
+        <svg id="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+        </svg>
+      </button>
     </div>
   </nav>
 
+  <!-- Main -->
   <div class="app-container">
-    <main class="form-main-container">
-      <img src="img/logo.png" alt="Logo Institucional" class="form-header-logo" id="form-logo-main" onerror="this.onerror=null;this.src='https://placehold.co/200x100/CCCCCC/000000?text=Logo+Error';">
-      <h2>Plataforma de Reporte Técnico</h2>
-      <p class="intro-text">Su colaboración es fundamental. Por favor, detalle el incidente técnico para asegurar una pronta resolución.</p>
-      
-      <form id="formulario">
-        <div class="row gx-md-4"> 
-            <div class="col-md-6 mb-4">
-              <label for="nombre" class="form-label">Nombre Completo *</label>
-              <input type="text" class="form-control" id="nombre" name="nombre" required placeholder="Ingresar Nombre">
-            </div>
-            <div class="col-md-6 mb-4">
-              <label for="contacto" class="form-label">Contacto <span class="opacity-75">(Opcional)</span></label>
-              <input type="text" class="form-control" id="contacto" name="contacto" placeholder="email o +569...">
-            </div>
+    <main class="card">
+      <div class="card__glow" aria-hidden="true"></div>
+
+      <!-- Header -->
+      <div class="card__header">
+        <div class="card__icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+            <line x1="16" y1="13" x2="8" y2="13" />
+            <line x1="16" y1="17" x2="8" y2="17" />
+            <polyline points="10 9 9 9 8 9" />
+          </svg>
+        </div>
+        <h1 class="card__title">Reporte Técnico</h1>
+        <p class="card__subtitle">Detalle el incidente técnico para que nuestro equipo pueda brindarle una atención
+          rápida y eficiente.</p>
+      </div>
+
+      <!-- Form -->
+      <form id="formulario" novalidate>
+        <!-- Section 1: Quién eres -->
+        <div class="form-section">
+          <span class="form-section__label">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+            Identificación
+          </span>
+        </div>
+        <div class="form-row">
+          <div class="form-group" id="group-nombre">
+            <label for="nombre" class="form-label">Nombre Completo <span class="required">*</span></label>
+            <input type="text" class="form-control" id="nombre" name="nombre" required
+              placeholder="Ej: Juan Pérez López" autocomplete="name">
+            <span class="field-error" id="error-nombre"></span>
+          </div>
+          <div class="form-group" id="group-contacto">
+            <label for="contacto" class="form-label">Contacto <span class="optional">(Opcional)</span></label>
+            <input type="text" class="form-control" id="contacto" name="contacto" placeholder="email o +569..."
+              autocomplete="email">
+            <span class="field-error" id="error-contacto"></span>
+          </div>
         </div>
 
-        <div class="row gx-md-4">
-            <div class="col-md-6 mb-4">
-              <label for="area" class="form-label">Área / Departamento *</label>
-              <select class="form-select" id="area" name="area" required>
-                <option value="" disabled selected>Seleccionar área...</option>
-                <option value="CESFAM La Unión">CESFAM La Unión</option>
-                <option value="DESAM">DESAM</option>
-                <option value="SAR">SAR</option>
-                <option value="CECOSF Dr. Daiber">CECOSF Dr. Daiber</option>
-                <option value="CECOSF Los Lagos">CECOSF Los Lagos</option>
-                <option value="Centro de Salud Maiten">Centro de Salud Maiten</option>
-                <option value="Otro">Otro (especificar en descripción)</option>
-              </select>
-            </div>
-            <div class="col-md-6 mb-4"> 
-                <label for="fecha" class="form-label">Fecha del Incidente *</label>
-                <input type="date" class="form-control" id="fecha" name="fecha" required>
-            </div>
+        <!-- Section 2: Dónde y qué tan grave -->
+        <div class="form-section">
+          <span class="form-section__label">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+              <circle cx="12" cy="10" r="3" />
+            </svg>
+            Ubicación e Impacto
+          </span>
+        </div>
+        <div class="form-row">
+          <div class="form-group" id="group-area">
+            <label for="area" class="form-label">Área / Departamento <span class="required">*</span></label>
+            <select class="form-control form-select" id="area" name="area" required>
+              <option value="" disabled selected>Seleccionar área...</option>
+              <option value="CESFAM La Unión">CESFAM La Unión</option>
+              <option value="DESAM">DESAM</option>
+              <option value="SAR">SAR</option>
+              <option value="CECOSF Dr. Daiber">CECOSF Dr. Daiber</option>
+              <option value="CECOSF Los Lagos">CECOSF Los Lagos</option>
+              <option value="Centro de Salud Maiten">Centro de Salud Maiten</option>
+              <option value="Otro">Otro (especificar en descripción)</option>
+            </select>
+            <span class="field-error" id="error-area"></span>
+          </div>
+          <div class="form-group" id="group-urgencia">
+            <label for="urgencia" class="form-label">Nivel de Urgencia <span class="required">*</span></label>
+            <select class="form-control form-select urgencia-select" id="urgencia" name="urgencia" required>
+              <option value="" disabled selected>Seleccionar...</option>
+              <option value="Bajo">🟢 Bajo — No impide trabajar</option>
+              <option value="Medio">🟡 Medio — Afecta parcialmente</option>
+              <option value="Crítico">🔴 Crítico — Trabajo detenido</option>
+            </select>
+            <span class="field-error" id="error-urgencia"></span>
+          </div>
         </div>
 
-        <div class="mb-4">
-          <label for="problema" class="form-label">Descripción Detallada del Incidente *</label>
-          <textarea class="form-control" id="problema" name="problema" rows="5" required placeholder="Describa el inconveniente"></textarea>
+        <!-- Section 3: Qué pasó -->
+        <div class="form-section">
+          <span class="form-section__label">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <line x1="17" y1="10" x2="3" y2="10" />
+              <line x1="21" y1="6" x2="3" y2="6" />
+              <line x1="21" y1="14" x2="3" y2="14" />
+              <line x1="17" y1="18" x2="3" y2="18" />
+            </svg>
+            Detalle del Incidente
+          </span>
+        </div>
+        <div class="form-group form-group--full" id="group-problema">
+          <label for="problema" class="form-label">Descripción <span class="required">*</span></label>
+          <textarea class="form-control" id="problema" name="problema" rows="5" required maxlength="2000"
+            placeholder="Describa el inconveniente con el mayor detalle posible: qué estaba haciendo, qué error apareció, desde cuándo ocurre..."></textarea>
+          <div class="textarea-footer">
+            <span class="field-error" id="error-problema"></span>
+            <span class="char-counter" id="char-counter">0 / 2000</span>
+          </div>
         </div>
 
-        <div class="confirmacion-container mb-5 mt-4"> 
-          <input type="checkbox" class="form-check-input" id="confirmacion" required>
-          <label class="form-check-label confirmacion-texto" for="confirmacion">Confirmo información </label>
+        <!-- Confirm + Submit -->
+        <div class="confirmacion-container" id="group-confirmacion">
+          <input type="checkbox" class="checkbox" id="confirmacion" required>
+          <label class="checkbox-label" for="confirmacion">Confirmo que la información proporcionada es correcta</label>
         </div>
 
-        <button type="submit" id="btnEnviarReporte" class="btn-custom w-full">Enviar Reporte Técnico</button>
+        <button type="submit" id="btnEnviarReporte" class="btn btn--primary btn--cta">
+          <svg class="btn-icon-svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13" />
+            <polygon points="22 2 15 22 11 13 2 9 22 2" />
+          </svg>
+          <span class="btn-text">ENVIAR REPORTE</span>
+        </button>
       </form>
-      <p id="respuesta" class="text-center mt-4"></p> 
+
+      <!-- Success overlay -->
+      <div id="success-overlay" class="success-overlay">
+        <svg class="success-check" viewBox="0 0 80 80" fill="none">
+          <circle cx="40" cy="40" r="36" stroke="url(#success-grad)" stroke-width="3" class="success-circle" />
+          <path d="M24 42l10 10 22-24" stroke="url(#success-grad)" stroke-width="3.5" stroke-linecap="round"
+            stroke-linejoin="round" class="success-path" />
+          <defs>
+            <linearGradient id="success-grad" x1="0" y1="0" x2="80" y2="80">
+              <stop stop-color="#06b6d4" />
+              <stop offset="1" stop-color="#10b981" />
+            </linearGradient>
+          </defs>
+        </svg>
+        <p class="success-text">¡Reporte enviado con éxito!</p>
+        <p class="success-sub">Nuestro equipo lo revisará a la brevedad.</p>
+      </div>
+
+      <div id="respuesta" class="response-area"></div>
     </main>
   </div>
 
-    <footer>
-        <p>&copy; <span id="current-year">2025</span> CESFAM Dr. Alfredo Gantz Mann</p> <p>
-            <a href="http://cesfamlu.github.io/links" target="_blank">Política de Privacidad</a> |
-            <a href="http://cesfamlu.github.io/links" target="_blank">Términos y Condiciones</a>
-        </p>
-    </footer>
+  <!-- Chatbot Widget -->
+  <div id="chatbot-fab" class="chatbot-fab" title="Asistente TI">
+    <svg id="fab-icon-chat" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    </svg>
+    <svg id="fab-icon-close" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+    <span class="fab-badge" id="fab-badge">1</span>
+  </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-    
-<script type="module" src="/FormularioSoporte/js/log.js"></script>
+  <div id="chatbot-window" class="chatbot-window">
+    <div class="chatbot-header">
+      <div class="chatbot-header-avatar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="10" rx="2" />
+          <circle cx="12" cy="5" r="2" />
+          <path d="M12 7v4" />
+          <line x1="8" y1="16" x2="8" y2="16" />
+          <line x1="16" y1="16" x2="16" y2="16" />
+        </svg>
+      </div>
+      <div class="chatbot-header-info">
+        <span class="chatbot-header-name">Asistente TI · IA</span>
+        <span class="chatbot-header-status">● En línea</span>
+      </div>
+    </div>
+    <div class="chatbot-messages" id="chatbot-messages"></div>
+    <div class="chatbot-quickreplies" id="chatbot-quickreplies"></div>
+    <div class="chatbot-input-bar">
+      <input type="text" id="chatbot-input" class="chatbot-input" placeholder="Escribe tu consulta..."
+        autocomplete="off">
+      <button id="chatbot-send" class="chatbot-send" title="Enviar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13" />
+          <polygon points="22 2 15 22 11 13 2 9 22 2" />
+        </svg>
+      </button>
+    </div>
+  </div>
 
- 
+  <!-- Footer -->
+  <footer class="footer">
+    <p>&copy; <span id="current-year"></span> CESFAM Dr. Alfredo Gantz Mann · La Unión</p>
+    <p>
+      <a href="http://cesfamlu.github.io/links" target="_blank">Política de Privacidad</a>
+      <span class="footer-sep">·</span>
+      <a href="http://cesfamlu.github.io/links" target="_blank">Términos y Condiciones</a>
+    </p>
+  </footer>
+
+  <!-- Firebase CDN -->
+  <script src="https://www.gstatic.com/firebasejs/11.2.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.2.0/firebase-database-compat.js"></script>
+  <script src="js/log.js"></script>
 </body>
+
 </html>
