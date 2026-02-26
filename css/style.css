@@ -305,15 +305,15 @@ body {
 }
 
 .navbar-logo-img {
-    height: 134px;
+    height: 34px;
     width: auto;
     object-fit: contain;
     flex-shrink: 0;
 }
 
 .navbar-title {
-    font-size: 0.82rem;
-    font-weight: 600;
+    font-size: 1.82rem;
+    font-weight: 900;
     color: var(--text-secondary);
     letter-spacing: 0.03em;
 }
