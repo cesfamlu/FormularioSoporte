@@ -753,7 +753,7 @@ chatFab.addEventListener('click', () => {
         if (firstOpen) {
             firstOpen = false;
             setTimeout(() => {
-                addMessage('¡Hola! 👋 Soy el **Asistente de TI** del CESFAM. Antes de enviar un reporte, quizás pueda ayudarte a resolver tu problema.\n\n¿Qué tipo de incidente tienes?', 'bot');
+                addMessage('¡Hola! 👋 Soy **Isikha Asistente de TI** del CESFAM. Antes de enviar un reporte, quizás pueda ayudarte a resolver tu problema.\n\n¿Qué tipo de incidente tienes?', 'bot');
                 setQuickReplies(['Internet', 'Impresora', 'RAS', 'PC lento', 'Correo', 'Portal de Enlaces', 'Otro problema']);
             }, 400);
         }
